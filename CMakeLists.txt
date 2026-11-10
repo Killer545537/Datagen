@@ -21,6 +21,15 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(CLI11)
 
+FetchContent_Declare(
+    nlohmann_json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG v3.12.0
+    GIT_SHALLOW True
+)
+
+FetchContent_MakeAvailable(nlohmann_json)
+
 add_executable(datagen
     src/main.cpp
     src/cli/generate.cpp
@@ -30,9 +39,10 @@ target_include_directories(datagen PRIVATE
     include
 )
 
- target_link_libraries(datagen PRIVATE
+target_link_libraries(datagen PRIVATE
     CLI11::CLI11
- )
+    nlohmann_json::nlohmann_json
+)
 
 target_compile_options(datagen PRIVATE
     -Wall
