@@ -1,4 +1,5 @@
 #include <datagen/cli/generate.hpp>
+#include <datagen/io/file.hpp>
 #include <print>
 
 namespace datagen::cli {
@@ -22,10 +23,30 @@ GenerateCommand::GenerateCommand(CLI::App& app) {
 }
 
 void GenerateCommand::execute() const {
-    std::println("Schema: {}", schema_.string());
-    std::println("Instructions: {}", instructions_.string());
-    std::println("Count: {}", count_);
-    std::println("Output: {}", output_.string());
+    auto instructions = io::read_text(instructions_);
+
+    if (!instructions) {
+        std::println(stderr, "Error reading instructions: {} : {}",
+                     instructions.error().path.string(), instructions.error().message);
+        return;
+    }
+
+    auto schema = io::read_json(schema_);
+
+    if (!schema) {
+        std::println(stderr, "Error reading schema: {} : {}", schema.error().path.string(),
+                     schema.error().message);
+        return;
+    }
+
+    if (!schema->is_object()) {
+        std::println(stderr, "Error: JSON schema must be an object");
+        return;
+    }
+
+    std::println("Instructions loaded: {} bytes", instructions->size());
+    std::println("Schema loaded successfully");
+    std::println("Records requested: {}", count_);
 }
 
 } // namespace datagen::cli
