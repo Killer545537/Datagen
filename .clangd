@@ -1,0 +1,31 @@
+
+CompileFlags:
+    CompilationDatabase: build
+    Add:
+        - -std=c++2c
+
+Diagnostics:
+    ClangTidy:
+        Add:
+            - bugprone-*
+            - cert-*
+            - cppcoreguidelines-*
+            - modernize-*
+            - performance-*
+            - portability-*
+            - readability-*
+        Remove:
+            - modernize-use-trailing-return-type
+            - readability-identifier-length
+            - readability-magic-numbers
+        CheckOptions:
+            readability-identifier-naming.ClassCase: CamelCase
+            readability-identifier-naming.StructCase: CamelCase
+            readability-identifier-naming.FunctionCase: lower_case
+            readability-identifier-naming.VariableCase: lower_case
+            readability-identifier-naming.NamespaceCase: lower_case
+
+    UnusedIncludes: Strict
+
+Hover:
+    ShowAKA: true
