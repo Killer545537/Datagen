@@ -1,4 +1,5 @@
 #include <datagen/cli/generate.hpp>
+#include <datagen/fm/client.hpp>
 #include <datagen/io/file.hpp>
 #include <print>
 
@@ -44,9 +45,47 @@ void GenerateCommand::execute() const {
         return;
     }
 
-    std::println("Instructions loaded: {} bytes", instructions->size());
-    std::println("Schema loaded successfully");
-    std::println("Records requested: {}", count_);
+    auto results = io::Json::array();
+
+    for (std::size_t i = 0; i < count_; ++i) {
+        std::println(std::cerr, "Generating {}/{}", i + 1, count_);
+
+        auto response = datagen::fm::Client::generate({
+            .schema = fs::absolute(schema_),
+            .instructions = *instructions,
+            .prompt = "Generate one new, distinct fictional record",
+        });
+
+        if (!response) {
+            std::println(stderr, "Error: {}", response.error().message);
+            return;
+        }
+
+        try {
+            results.push_back(io::Json::parse(*response));
+        } catch (const io::Json::parse_error& error) {
+            std::println(stderr, "Error parsing response: {}", error.what());
+            return;
+        }
+    }
+
+    const auto serialized = results.dump(2) + '\n';
+
+    if (output_.empty()) {
+        std::print(std::cout, "{}", serialized);
+        return;
+    }
+
+    std::ofstream file{output_, std::ios::binary};
+    file << serialized;
+    file.flush();
+
+    if (!file) {
+        std::println(stderr, "Failed to write output: {}", output_.string());
+        return;
+    }
+
+    std::println(std::cerr, "Wrote {} records to {}", results.size(), output_.string());
 }
 
 } // namespace datagen::cli

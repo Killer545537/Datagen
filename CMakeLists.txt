@@ -33,6 +33,7 @@ FetchContent_MakeAvailable(nlohmann_json)
 add_executable(datagen
     src/main.cpp
     src/cli/generate.cpp
+    src/fm/client.cpp
     src/io/file.cpp
 )
 
